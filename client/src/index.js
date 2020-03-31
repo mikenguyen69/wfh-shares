@@ -14,7 +14,8 @@ import { WebSocketLink } from 'apollo-link-ws';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 
 const wsLink = new WebSocketLink({
-  uri: 'ws://localhost:4000/graphql',
+  uri: process.env.NODE_ENV === "production" ? 
+    'wss://wfh-shares.herokuapp.com/graphql' : "ws://localhost:4000/graphql",
   options: {
     reconnect: true
   }
@@ -30,7 +31,7 @@ const Root = () => {
 
   const initialState = useContext(Context);
   const [state, dispatch] = useReducer(reducer, initialState)
-  
+
   return (
     <Router>
       <ApolloProvider client={client}>

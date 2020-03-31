@@ -32,7 +32,7 @@ const Map = ({ classes }) => {
   }, [])
 
   useEffect(() => {
-    const pinExists = popup && state.pins.findIndex(pin = pin._id === popup._id) > -1
+    const pinExists = popup && state.pins.findIndex(pin => pin._id === popup._id) > -1
     if (!pinExists) {
       setPopup(null);
     }
@@ -102,6 +102,7 @@ const Map = ({ classes }) => {
           <img 
             className={classes.picture}
             src={pin.author.picture} 
+            alt={pin.note}
             onClick={() => handleSelectPin(pin)} />
         </Marker>
       ))}
