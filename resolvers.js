@@ -20,7 +20,7 @@ const getCurrentDate = () => {
 
 module.exports = {
     Query: {
-        me: authenticated((root, args, ctx) => ctx.currentUser),
+        me: (root, args, ctx) => ctx.currentUser,
         getPins: async (root, args, ctx) => {
             const pins = await Pin.find({createdAt: {$gte: getCurrentDate()}})
                 .populate('author')
