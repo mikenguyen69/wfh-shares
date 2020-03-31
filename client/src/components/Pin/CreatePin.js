@@ -32,10 +32,7 @@ const CreatePin = ({ classes }) => {
       const {latitude, longitude} = draft;
       const variables = {weather, feeling, image: url,  note, latitude, longitude};
 
-      const {createPin} = await client.request(CREATE_PIN_MUTATION, variables);
-      
-      console.log("Pin created", {createPin});
-      dispatch({type: "CREATE_PIN", payload: createPin});
+      await client.request(CREATE_PIN_MUTATION, variables);
       handleDeleteDraft();
     }
     catch(err) {

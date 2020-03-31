@@ -12,6 +12,8 @@ import PinIcon from './PinIcon';
 import Context from '../context';
 import Blog from './Blog';
 //import { CREATE_PIN_MUTATION } from "../graphql/mutations";
+import {PIN_ADDED_SUBSCRIPTION, PIN_UPDATED_SUBSCRIPTION} from '../graphql/subscriptions';
+import { Subscription } from "react-apollo";
 
 const Map = ({ classes }) => {
   const client = useClient();
@@ -138,7 +140,23 @@ const Map = ({ classes }) => {
 
       }
     </ReactMapGL>
-
+    {/* Subscriptions for creating / updating / deleting Pins */}
+    <Subscription
+      subscription={PIN_ADDED_SUBSCRIPTION}
+      onSubscriptionData={({subscriptionData}) => {
+        const {pinAdded} = subscriptionData.data
+        console.log("Pin Added", pinAdded)
+        dispatch({type: "CREATE_PIN", payload: pinAdded})
+      }}
+    />
+    <Subscription
+      subscription={PIN_UPDATED_SUBSCRIPTION}
+      onSubscriptionData={({subscriptionData}) => {
+        const {pinUpdated} = subscriptionData.data
+        console.log("Pin updated", pinUpdated)
+        dispatch({type: "CREATE_COMMENT", payload: pinUpdated})
+      }}
+    />
     {/* Blog area to add Pin content */}
     <Blog />
   </div>)
