@@ -32,7 +32,7 @@ const PinContent = ({ classes }) => {
         className={classes.button} 
           variant="contained" 
           color="primary" 
-          onClick={handleEdit}
+          onClick={handleCheckin}
         >
           <CheckinIcon className={classes.buttonIcon} />
           Check-in Now !
@@ -57,7 +57,7 @@ const PinContent = ({ classes }) => {
           className={classes.button} 
           variant="contained" 
           color="secondary" 
-          onClick={handleCheckin}
+          onClick={handleEdit}
         >
           <EditIcon className={classes.buttonIcon} />
           Edit

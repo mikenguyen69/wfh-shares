@@ -80,9 +80,7 @@ export default function reducer(state, {type, payload}) {
             }
 
         case "EDIT_PIN": 
-            
-            const editPin = { ...payload, editable: true};
-            
+            const editPin = payload;
             return {
                 ...state,
                 draft: editPin,
