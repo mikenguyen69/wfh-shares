@@ -22,23 +22,23 @@ const server = new ApolloServer( {
     },
     introspection: true, 
     playground: true,
-    context:  async ({req}) => {
-        let authToken = null
-        let currentUser = null
-        try {
-            authToken = req.headers.authorization
-            console.log(authToken)
-            if (authToken) {
+    // context:  async ({req}) => {
+    //     let authToken = null
+    //     let currentUser = null
+    //     try {
+    //         authToken = req.headers.authorization
+    //         console.log(authToken)
+    //         if (authToken) {
                 
-                // find or create user
-                currentUser = await findOrCreateUser(authToken)
-            }
+    //             // find or create user
+    //             currentUser = await findOrCreateUser(authToken)
+    //         }
 
-        } catch(err) {
-            console.error(`Unable to authenticate user with token ${authToken}`)
-        }
-        return {currentUser}
-    }
+    //     } catch(err) {
+    //         console.error(`Unable to authenticate user with token ${authToken}`)
+    //     }
+    //     return {currentUser}
+    // }
 });
 
 server.listen({ port: process.env.PORT || 4000 }).then(({url}) => {
