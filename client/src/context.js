@@ -6,8 +6,8 @@ const context = createContext({
     draft: null, 
     pins: [],
     currentLocation: null,
-    currentPin: null
+    currentPin: null, 
+    checkedin: false
 })
-
 
 export default context;

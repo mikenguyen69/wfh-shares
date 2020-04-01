@@ -3,18 +3,42 @@ import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import AccessTimeIcon from "@material-ui/icons/AccessTime";
 import FaceIcon from "@material-ui/icons/Face";
+import EditIcon from "@material-ui/icons/Edit";
+import CheckinIcon from "@material-ui/icons/GpsFixed";
 import format from 'date-fns/format'
-
+import Button from "@material-ui/core/Button";
 import Context from '../../context';
 import CreateComment from '../Comment/CreateComment';
 import Comments from '../Comment/Comments';
 
 const PinContent = ({ classes }) => {
-  const { state } = useContext(Context);
+  const { state, dispatch } = useContext(Context);
   const { weather , feeling, note, author, createdAt, comments} = state.currentPin;
+  const showEdit = state.currentUser._id === state.currentPin.author._id;
+  
+  const handleEdit = async () => {
+    dispatch({type: "EDIT_PIN", payload: state.currentPin });
+  }
+
+  const handleCheckin = async () => {
+    dispatch({type: "CREATE_DRAFT"})
+  }
 
   return (
     <div className={classes.root}>
+
+      {!state.checkedin && (
+        <Button 
+        className={classes.button} 
+          variant="contained" 
+          color="primary" 
+          onClick={handleEdit}
+        >
+          <CheckinIcon className={classes.buttonIcon} />
+          Check-in Now !
+        </Button>
+      )}
+
       <Typography component="h2" variant="h4" color="primary" gutterBottom>
 
       </Typography>
@@ -27,6 +51,18 @@ const PinContent = ({ classes }) => {
       <Typography variant="subtitle2">
         Weather is <b>{weather}</b> and it feels <b>{feeling}</b> with a note of <i>{note}</i>
       </Typography>
+      
+      {showEdit && (
+        <Button 
+          className={classes.button} 
+          variant="contained" 
+          color="secondary" 
+          onClick={handleCheckin}
+        >
+          <EditIcon className={classes.buttonIcon} />
+          Edit
+        </Button>
+      )}
 
       <CreateComment />
       <Comments comments={comments} />
@@ -43,6 +79,18 @@ const styles = theme => ({
   icon: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit
+  },
+  buttonIcon: {
+    fontSize: 20,
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit
+  },
+
+  button: {
+    marginTop: theme.spacing.unit * 2,
+    marginBottom: theme.spacing.unit * 2,
+    marginRight: theme.spacing.unit ,
+    marginLeft: 0
   },
   text: {
     display: "flex",

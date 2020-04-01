@@ -12,7 +12,7 @@ import PinIcon from './PinIcon';
 import Context from '../context';
 import Blog from './Blog';
 //import { CREATE_PIN_MUTATION } from "../graphql/mutations";
-import {PIN_ADDED_SUBSCRIPTION, PIN_UPDATED_SUBSCRIPTION} from '../graphql/subscriptions';
+import {PIN_ADDED_SUBSCRIPTION, PIN_UPDATED_SUBSCRIPTION, COMMENT_ADDED_SUBSCRIPTION} from '../graphql/subscriptions';
 import { Subscription } from "react-apollo";
 
 const Map = ({ classes }) => {
@@ -108,7 +108,7 @@ const Map = ({ classes }) => {
       ))}
 
       {/* For current user location */}
-      {!state.currentPin && state.currentLocation && (        
+      {!state.checkedin && (        
           <Marker
             latitude={state.currentLocation.latitude}
             longitude={state.currentLocation.longitude}
@@ -139,8 +139,8 @@ const Map = ({ classes }) => {
             <Typography>
               You are feeling <b>{popup.feeling}</b>
             </Typography>       
-            <Typography>
-              <i>{popup.note}</i>
+            <Typography className={classes.note}>
+              <q><i>{popup.note}</i></q> - {popup.author.name}
             </Typography>
           </div>
         </Popup>
@@ -162,7 +162,15 @@ const Map = ({ classes }) => {
       onSubscriptionData={({subscriptionData}) => {
         const {pinUpdated} = subscriptionData.data
         console.log("Pin updated", pinUpdated)
-        dispatch({type: "CREATE_COMMENT", payload: pinUpdated})
+        dispatch({type: "CREATE_PIN", payload: pinUpdated})
+      }}
+    />
+    <Subscription
+      subscription={COMMENT_ADDED_SUBSCRIPTION}
+      onSubscriptionData={({subscriptionData}) => {
+        const {commentAdded} = subscriptionData.data
+        console.log("Comments Added", commentAdded)
+        dispatch({type: "CREATE_COMMENT", payload: commentAdded})
       }}
     />
     {/* Blog area to add Pin content */}
@@ -192,6 +200,10 @@ const styles = {
     height: 200,
     width: 200,
     objectFit: "cover"
+  },
+  note: {
+    maxWidth: 200,
+    paddingTop: "0.5em"
   },
   popupTab: {
     display: "flex",

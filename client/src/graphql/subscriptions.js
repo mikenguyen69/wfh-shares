@@ -57,3 +57,32 @@ export const PIN_UPDATED_SUBSCRIPTION = gql`
         }
     }
 `
+
+export const COMMENT_ADDED_SUBSCRIPTION = gql`
+    subscription {
+        commentAdded {
+            _id
+            createdAt
+            weather
+            feeling
+            image
+            note,
+            latitude
+            longitude
+            author {
+                _id
+                name
+                email
+                picture
+            }
+            comments {
+                text
+                createdAt
+                author {
+                    name
+                    picture
+                }
+            }
+        }
+    }
+`

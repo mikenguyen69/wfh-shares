@@ -10,29 +10,47 @@ import ClearIcon from "@material-ui/icons/Clear";
 import SaveIcon from "@material-ui/icons/SaveTwoTone";
 import Context from '../../context';
 import axios from 'axios';
-import {CREATE_PIN_MUTATION} from '../../graphql/mutations';
+import {CREATE_PIN_MUTATION, EDIT_PIN_MUTATION} from '../../graphql/mutations';
 import {useClient} from '../../client';
 
 
 const CreatePin = ({ classes }) => {
   const client = useClient();
   const {state, dispatch} = useContext(Context);
-  const [feeling, setFeeling] = useState('');
-  const [weather, setWeather] = useState('');
+  const {draft, checkedin} = state;
+
+  const [feeling, setFeeling] = useState(checkedin ? draft.feeling: '');
+  const [weather, setWeather] = useState(checkedin ? draft.weather : '');
   const [image, setImage] = useState('');
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState(checkedin ? draft.note: '');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async event => {
     try {
       event.preventDefault();
       setSubmitting(true);
-      const url = await handleImageUpload();
-      const {draft} = state;
-      const {latitude, longitude} = draft;
-      const variables = {weather, feeling, image: url,  note, latitude, longitude};
 
-      await client.request(CREATE_PIN_MUTATION, variables);
+      let url;
+      // handle image optional or no change
+      if (image !== '') {
+        url = await handleImageUpload();
+      } 
+      else if (checkedin) {
+        url = draft.image;
+      }
+
+      const {latitude, longitude} = draft;
+      const variables = {weather, feeling, image:url,  note};
+
+      console.log('before submitting',image, variables, draft, state.currentPin)
+
+      if (checkedin) {
+        await client.request(EDIT_PIN_MUTATION, { pinId: state.currentPin._id, ...variables} );
+      }
+      else {
+        await client.request(CREATE_PIN_MUTATION, {...variables, latitude, longitude });
+      }
+     
       handleDeleteDraft();
     }
     catch(err) {
@@ -42,6 +60,7 @@ const CreatePin = ({ classes }) => {
   }
 
   const handleImageUpload = async () => {
+
     const data = new FormData()
     data.append("file", image)
     data.append("upload_preset", "geovehicles")
@@ -55,10 +74,6 @@ const CreatePin = ({ classes }) => {
   }
 
   const handleDeleteDraft = event => {
-    setWeather('');
-    setFeeling('');
-    setImage('');
-    setNote('');
     dispatch({type: "DELETE_DRAFT"});
   }
 
@@ -109,6 +124,14 @@ const CreatePin = ({ classes }) => {
         </TextField>
         </div>
         <div className={classes.contentField}>
+          {checkedin && (
+            <img 
+              className={classes.popupImage}
+              src={draft.image} 
+              alt={draft.note}
+            />
+          )}
+
           <input 
             accept="image/*" 
             id="image" 
@@ -135,6 +158,7 @@ const CreatePin = ({ classes }) => {
             margin='normal'
             fullWidth
             variant="outlined" 
+            value={note}
             onChange={e => setNote(e.target.value)}
           />
         </div>
@@ -152,7 +176,7 @@ const CreatePin = ({ classes }) => {
             className={classes.button} 
             variant="contained" 
             color="secondary" 
-            disabled={!weather.trim()||!feeling.trim()||!image || !note.trim() || submitting}
+            disabled={!weather.trim()||!feeling.trim() || !note.trim() || submitting}
             onClick={handleSubmit}
           >
             <SaveIcon className={classes.rightIcon}  />
@@ -177,6 +201,12 @@ const styles = theme => ({
     marginRight: theme.spacing.unit,
     marginTop: theme.spacing.unit,
     width: "95%"
+  },
+  popupImage: {
+    padding: "0.4em",
+    height: 200,
+    width: 200,
+    objectFit: "cover"
   },
   input: {
     display: "none"

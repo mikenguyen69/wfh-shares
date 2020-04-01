@@ -13,7 +13,6 @@ export default function reducer(state, {type, payload}) {
             }
 
         case "IS_LOGGED_IN": 
-            
             return {
                 ...state,
                 isAuth: payload
@@ -30,18 +29,9 @@ export default function reducer(state, {type, payload}) {
             return {
                 ...state,
                 currentPin: null,
-                draft: {
-                    latitude: 0,
-                    longitude: 0
-                }
+                draft: { ...state.currentLocation}
             }
-        
-        case "UPDATE_DRAFT_LOCATION": 
-            return {
-                ...state,
-                draft: payload
-            }
-
+            
         case "DELETE_DRAFT": 
             return {
                 ...state,
@@ -52,13 +42,11 @@ export default function reducer(state, {type, payload}) {
             
             const myPin = payload.find(pin => pin.author._id === state.currentUser._id);
             
-            console.log("Get Pins", myPin);
-
             return {
                 ...state,
                 pins: payload,
                 currentPin: myPin,
-                draft: myPin !== undefined ? null : state.currentLocation
+                checkedin: myPin !== undefined
             }
          
         case "CREATE_PIN": 
@@ -91,6 +79,15 @@ export default function reducer(state, {type, payload}) {
                 currentPin: updatedCurrentPin
             }
 
+        case "EDIT_PIN": 
+            
+            const editPin = { ...payload, editable: true};
+            
+            return {
+                ...state,
+                draft: editPin,
+            }
+        
         default: 
             return state;        
     }

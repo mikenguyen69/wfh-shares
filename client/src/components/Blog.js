@@ -3,7 +3,6 @@ import { withStyles } from "@material-ui/core/styles";
 import { Paper } from "@material-ui/core";
 
 import Context from '../context';
-import NoContent from './Pin/NoContent';
 import CreatePin from './Pin/CreatePin';
 import PinContent from './Pin/PinContent';
 
@@ -13,14 +12,13 @@ const Blog = ({ classes }) => {
 
   console.log("At blog ", draft, currentPin);
 
-  let BlogContent = CreatePin;
-  if (!draft && !currentPin) {
-    BlogContent = NoContent;
-  } else if (draft & !currentPin) {
-    BlogContent = CreatePin;
-  }
-  else if (!draft && currentPin) {
+  let BlogContent;
+
+  if (!draft && currentPin) {
     BlogContent = PinContent;
+  }
+  else {
+    BlogContent = CreatePin;
   }
 
   return (

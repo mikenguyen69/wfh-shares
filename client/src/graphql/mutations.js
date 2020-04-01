@@ -26,6 +26,33 @@ export const CREATE_PIN_MUTATION = `
     }
 `
 
+export const EDIT_PIN_MUTATION = `
+    mutation($pinId: ID!, $weather: String!, $feeling: String!, $image: String!, $note: String!) {
+        editPin(input: {
+            pinId: $pinId, 
+            weather: $weather,
+            feeling: $feeling,
+            image: $image,
+            note: $note
+        }) {
+            _id
+            createdAt
+            weather
+            feeling
+            image
+            note,
+            latitude
+            longitude
+            author {
+                _id
+                name
+                email
+                picture
+            }
+        }
+    }
+`
+
 export const CREATE_COMMENT_MUTATION = `
     mutation($pinId: ID!, $text: String!) {
         createComment(pinId: $pinId, text: $text) {

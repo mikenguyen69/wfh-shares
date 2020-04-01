@@ -36,6 +36,14 @@ module.exports = gql`
         longitude: Float
     }
 
+    input EditPinInput {
+        pinId: ID
+        weather: String
+        feeling: String
+        image: String
+        note: String
+    }
+
     type Query {
         me: User
         getPins: [Pin!]
@@ -43,12 +51,14 @@ module.exports = gql`
 
     type Mutation {
         createPin(input: CreatePinInput!): Pin
+        editPin(input: EditPinInput!): Pin
         createComment(pinId: ID!, text: String!): Pin
     }
 
     type Subscription {
         pinAdded: Pin
         pinUpdated: Pin
+        commentAdded: Pin
     }
 
 `
