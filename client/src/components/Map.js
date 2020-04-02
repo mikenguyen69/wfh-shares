@@ -38,8 +38,17 @@ const Map = ({ classes }) => {
     }
   }, [state.pins.length])
 
+  const getCurrentDate = () => {
+    var today = new Date();
+    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-'+today.getDate();
+    return date;
+  }
+
   const getPins = async () => {
-    const { getPins} = await client.request(GET_PINS_QUERY);
+
+    const { getPins} = await client.request(GET_PINS_QUERY, 
+      { today: getCurrentDate() }
+    );
 
     dispatch({type: "GET_PINS", payload: getPins})
   }

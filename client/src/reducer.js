@@ -46,6 +46,7 @@ export default function reducer(state, {type, payload}) {
                 ...state,
                 pins: payload,
                 currentPin: myPin,
+                draft: myPin !== undefined ? null : {...state.currentLocation},
                 checkedin: myPin !== undefined
             }
          
@@ -56,7 +57,8 @@ export default function reducer(state, {type, payload}) {
             return {
                 ...state,
                 pins: [...prevPins, newPin],
-                currentPin: payload
+                currentPin: payload,
+                checkedin: true
             }
 
         case "SET_PIN": 
