@@ -15,7 +15,7 @@ const authenticated = next => (root, args, ctx, info) => {
 
 const getCurrentDate = () => {
     var today = new Date();
-    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-'+today.getDate();
+    var date = today.getFullYear() + '-' + (today.getUTCMonth() + 1) + '-'+today.getUTCDate();
     return date;
 }
 
