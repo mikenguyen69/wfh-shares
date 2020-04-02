@@ -37,6 +37,19 @@ export default function reducer(state, {type, payload}) {
                 ...state,
                 draft: null
             }
+        
+        case "DELETE_PIN" : 
+            const remainingPins = state.pins.filter(pin => pin._id !== payload._id);
+
+            console.log("before and after", payload, state.pins.length, remainingPins.length);
+
+            return {
+                ...state,
+                pin: remainingPins,
+                checkedin: false,
+                currentPin: null,
+                draft: {...state.currentLocation}
+            }
 
         case "GET_PINS": 
             

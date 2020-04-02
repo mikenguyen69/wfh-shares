@@ -86,3 +86,11 @@ export const COMMENT_ADDED_SUBSCRIPTION = gql`
         }
     }
 `
+
+export const PIN_DELETED_SUBSCRIPTION = gql`
+    subscription {
+        pinDeleted {
+            _id
+        }
+    }
+`

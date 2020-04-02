@@ -1,8 +1,9 @@
-const { AuthenticationError, PubSub } = require('apollo-server')
-const Pin = require('./models/Pin')
-const pubsub = new PubSub()
-const PIN_ADDED = "PIN_ADDED"
-const PIN_UPDATED = "PIN_UPDATED"
+const { AuthenticationError, PubSub } = require('apollo-server');
+const Pin = require('./models/Pin');
+const pubsub = new PubSub();
+const PIN_ADDED = "PIN_ADDED";
+const PIN_UPDATED = "PIN_UPDATED";
+const PIN_DELETED = "PIN_DELETED";
 const COMMENT_ADDED = "COMMENT_ADDED";
 
 const authenticated = next => (root, args, ctx, info) => {
@@ -99,6 +100,16 @@ module.exports = {
 
             return pinUpdated;
         }),
+
+        deletePin: authenticated(async (root, args, ctx) => {
+            const pinDeleted = await Pin.findOneAndDelete({
+                _id: args.pinId
+            }).exec()
+
+            pubsub.publish(PIN_DELETED, {pinDeleted});
+            
+            return pinDeleted;
+        }),
         
         createComment: authenticated(async (root, args, ctx) => {
             const newComment = {text: args.text, author: ctx.currentUser._id}
@@ -127,6 +138,9 @@ module.exports = {
         },
         pinUpdated: {
             subscribe: () => pubsub.asyncIterator(PIN_UPDATED)
+        },
+        pinDeleted: {
+            subscribe: () => pubsub.asyncIterator(PIN_DELETED)
         }
     }
 }

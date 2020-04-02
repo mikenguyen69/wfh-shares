@@ -26,6 +26,14 @@ export const CREATE_PIN_MUTATION = `
     }
 `
 
+export const DELETE_PIN_MUTATION = `
+    mutation($pinId: ID!) {
+        deletePin(pinId: $pinId) {
+            _id
+        }
+    }
+`
+
 export const EDIT_PIN_MUTATION = `
     mutation($pinId: ID!, $weather: String!, $feeling: String!, $image: String, $note: String!) {
         editPin(input: {

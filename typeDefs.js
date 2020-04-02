@@ -52,12 +52,14 @@ module.exports = gql`
     type Mutation {
         createPin(input: CreatePinInput!): Pin
         editPin(input: EditPinInput!): Pin
+        deletePin(pinId: ID!): Pin
         createComment(pinId: ID!, text: String!): Pin
     }
 
     type Subscription {
         pinAdded: Pin
         pinUpdated: Pin
+        pinDeleted: Pin
         commentAdded: Pin
     }
 

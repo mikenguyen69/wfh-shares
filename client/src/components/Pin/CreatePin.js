@@ -163,20 +163,23 @@ const CreatePin = ({ classes }) => {
           />
         </div>
         <div className={classes.contentField}>
-          <Button 
-            className={classes.button} 
-            variant="contained" 
-            color="primary" 
-            onClick={handleDeleteDraft}
-          >
-            <ClearIcon className={classes.leftIcon} />
-            Discard
-          </Button>
+          { checkedin && (
+            <Button 
+              className={classes.button} 
+              variant="contained" 
+              color="primary" 
+              onClick={handleDeleteDraft}
+            >
+              <ClearIcon className={classes.leftIcon} />
+              Discard
+            </Button>
+          )}
+          
           <Button 
             className={classes.button} 
             variant="contained" 
             color="secondary" 
-            disabled={!weather.trim()||!feeling.trim() || !note.trim() || submitting}
+            disabled={!weather.trim() || !feeling.trim() || !note.trim() || submitting}
             onClick={handleSubmit}
           >
             <SaveIcon className={classes.rightIcon}  />

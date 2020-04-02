@@ -12,7 +12,9 @@ import PinIcon from './PinIcon';
 import Context from '../context';
 import Blog from './Blog';
 //import { CREATE_PIN_MUTATION } from "../graphql/mutations";
-import {PIN_ADDED_SUBSCRIPTION, PIN_UPDATED_SUBSCRIPTION, COMMENT_ADDED_SUBSCRIPTION} from '../graphql/subscriptions';
+import {PIN_ADDED_SUBSCRIPTION, PIN_UPDATED_SUBSCRIPTION, 
+  PIN_DELETED_SUBSCRIPTION,
+  COMMENT_ADDED_SUBSCRIPTION} from '../graphql/subscriptions';
 import { Subscription } from "react-apollo";
 
 const Map = ({ classes }) => {
@@ -33,6 +35,7 @@ const Map = ({ classes }) => {
 
   useEffect(() => {
     const pinExists = popup && state.pins.findIndex(pin => pin._id === popup._id) > -1
+
     if (!pinExists) {
       setPopup(null);
     }
@@ -46,27 +49,14 @@ const Map = ({ classes }) => {
 
   const getPins = async () => {
 
-    const { getPins} = await client.request(GET_PINS_QUERY, 
-      { today: getCurrentDate() }
-    );
+    const { getPins} = await client.request(GET_PINS_QUERY);
 
     dispatch({type: "GET_PINS", payload: getPins})
   }
 
   const handleMapClick = ({lngLat, leftButton}) => {
     
-    if (!leftButton) return;
-    
-    // if (!state.draft) {
-    //   dispatch({type: "CREATE_DRAFT"})
-    // }
-
-    // const [longitude, latitude] = lngLat;
-    
-    // dispatch({
-    //   type: "UPDATE_DRAFT_LOCATION",
-    //   payload: {longitude, latitude}
-    // });    
+    if (!leftButton) return; 
   }
 
   const handleViewPortChange = newViewport => {
@@ -107,7 +97,7 @@ const Map = ({ classes }) => {
           offsetLeft={-19}
           offsetTop={-37}           
           >
-
+            
           <img 
             className={classes.picture}
             src={pin.author.picture} 
@@ -172,6 +162,14 @@ const Map = ({ classes }) => {
         const {pinUpdated} = subscriptionData.data
         console.log("Pin updated", pinUpdated)
         dispatch({type: "CREATE_PIN", payload: pinUpdated})
+      }}
+    />
+    <Subscription
+      subscription={PIN_DELETED_SUBSCRIPTION}
+      onSubscriptionData={({subscriptionData}) => {
+        const {pinDeleted} = subscriptionData.data
+        console.log("Pin deleted", pinDeleted)
+        dispatch({type: "DELETE_PIN", payload: pinDeleted })
       }}
     />
     <Subscription
