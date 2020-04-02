@@ -13,10 +13,21 @@ const authenticated = next => (root, args, ctx, info) => {
     return next(root, args, ctx, info)
 }
 
+
+
 const getCurrentDate = () => {
     var today = new Date();
-    var date = today.getFullYear() + '-' + (today.getUTCMonth() + 1) + '-'+ (today.getUTCDate()-1) + ' 11:00:00'; 
-    // Need to handle end of the month 
+    var yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+
+    const isFirstDayOfTheYear = today.getUTCMonth() === 0 && today.getUTCDate() === 1;
+    const isFirstDayOfTheMonth = today.getUTCDate() === 1;
+
+    const yearPart = isFirstDayOfTheYear ? yesterday.getUTCFullYear() : today.getUTCFullYear();
+    const monthPart = isFirstDayOfTheYear ? 12 : (today.getUTCMonth() + 1);
+    const datePart = isFirstDayOfTheMonth ? yesterday.getUTCDate() : (today.getUTCDate() - 1);
+
+    var date = yearPart + '-' + monthPart + '-' + datePart + ' 11:00:00'; 
+
     return date;
 }
 
