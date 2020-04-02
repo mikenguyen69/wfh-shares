@@ -52,9 +52,8 @@ export default function reducer(state, {type, payload}) {
             }
 
         case "GET_PINS": 
-            
             const myPin = payload.find(pin => pin.author._id === state.currentUser._id);
-            
+
             return {
                 ...state,
                 pins: payload,
