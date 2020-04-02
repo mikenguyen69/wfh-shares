@@ -23,6 +23,8 @@ module.exports = {
     Query: {
         me: (root, args, ctx) => ctx.currentUser,
         getPins: async (root, args, ctx) => {
+
+            console.log("in GetPins", args);
             const pins = await Pin.find({createdAt: {$gte: getCurrentDate()}})
                 .populate('author')
                 .populate('comments.author');
