@@ -1,5 +1,5 @@
 export const CREATE_PIN_MUTATION = `
-    mutation($weather: String!, $feeling: String!, $image: String!, $note: String!, $latitude: Float!, $longitude: Float!) {
+    mutation($weather: String!, $feeling: String!, $image: String, $note: String!, $latitude: Float!, $longitude: Float!) {
         createPin(input: {
             weather: $weather,
             feeling: $feeling,
@@ -27,7 +27,7 @@ export const CREATE_PIN_MUTATION = `
 `
 
 export const EDIT_PIN_MUTATION = `
-    mutation($pinId: ID!, $weather: String!, $feeling: String!, $image: String!, $note: String!) {
+    mutation($pinId: ID!, $weather: String!, $feeling: String!, $image: String, $note: String!) {
         editPin(input: {
             pinId: $pinId, 
             weather: $weather,
