@@ -17,11 +17,11 @@ const authenticated = next => (root, args, ctx, info) => {
 
 
 const getCurrentDate = () => {
-    var today = new Date();
-
-    var date = today.getUTCFullYear() + '-' + (today.getUTCMonth() + 1) + '-' + today.getUTCDate() + ' 11:00'; 
-
-    return date;
+    var yesterday = (new Date(new Date().setDate(new Date().getDate()-1))).toUTCString();
+    console.log("yesterday: ", yesterday);
+    console.log("now: ", (new Date()).toUTCString());
+    //var date = yesterday.getUTCFullYear() + '-' + (yesterday.getUTCMonth() + 1) + '-' + yesterday.getUTCDate(); 
+    return yesterday;
 }
 
 module.exports = {
@@ -44,9 +44,7 @@ module.exports = {
             }).save()
 
             const pinAdded = await Pin.populate(newPin, 'author')
-            
             pubsub.publish(PIN_ADDED, {pinAdded})
-
             return pinAdded;
 
         }),

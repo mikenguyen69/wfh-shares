@@ -1,3 +1,5 @@
+
+
 export default function reducer(state, {type, payload}) {    
     switch(type) {
 
@@ -52,11 +54,19 @@ export default function reducer(state, {type, payload}) {
             }
 
         case "GET_PINS": 
-            const myPin = payload.find(pin => pin.author._id === state.currentUser._id);
+            
+            // handle local conversion of today date 
+            // Filter only those posted today as local time
+            // convert the createdAt date pin to local time first then filter
+            const currentDate = new Date();
+            const todayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+            var todayPosts = payload.filter(pin => pin.createdAt >= todayDate.valueOf());
+
+            const myPin = todayPosts.find(pin => pin.author._id === state.currentUser._id);
 
             return {
                 ...state,
-                pins: payload,
+                pins: todayPosts,
                 currentPin: myPin,
                 draft: myPin !== undefined ? null : {...state.currentLocation},
                 checkedin: myPin !== undefined
