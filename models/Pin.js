@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
 const PinSchema = new mongoose.Schema({
-    weather: String,   
-    feeling: String,
+    mood: Number,
     image: String,
     note: String, 
     latitude: Number,

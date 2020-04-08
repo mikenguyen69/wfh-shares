@@ -52,7 +52,7 @@ module.exports = {
         editPin: authenticated(async (root, args, ctx) => {
             
             const input = args.input;
-            const {pinId, weather, feeling, image, note, mood} = input;
+            const {pinId, image, note, mood} = input;
 
             const existingPin = await Pin.findOne({_id: pinId});
             let updatedValues = {};
@@ -61,12 +61,6 @@ module.exports = {
                 console.error("Something wrong! Null existing", input);
                 return;
             }
-
-            if (existingPin.weather !== weather) 
-                updatedValues = {...updatedValues, weather};
-
-            if (existingPin.feeling !== feeling) 
-                updatedValues = {...updatedValues, feeling};
 
             if (existingPin.image !== image) 
                 updatedValues = {...updatedValues, image};
