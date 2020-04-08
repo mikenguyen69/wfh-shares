@@ -52,7 +52,7 @@ module.exports = {
         editPin: authenticated(async (root, args, ctx) => {
             
             const input = args.input;
-            const {pinId, weather, feeling, image, note} = input;
+            const {pinId, weather, feeling, image, note, mood} = input;
 
             const existingPin = await Pin.findOne({_id: pinId});
             let updatedValues = {};
@@ -73,8 +73,10 @@ module.exports = {
             
             if (existingPin.note !== note) 
                 updatedValues = {...updatedValues, note};
+
+            if (existingPin.mood !== mood)
+                updatedValues = {...updatedValues, mood};
             
-            console.log('before edit', input, updatedValues);
             
             const pinUpdated = await Pin.findOneAndUpdate(
                 { _id: input.pinId }, 
@@ -83,8 +85,6 @@ module.exports = {
             )
             .populate('author')
             .populate('comments.author');
-
-            console.log('after edit', input, updatedValues, pinUpdated);
 
             pubsub.publish(PIN_UPDATED, {pinUpdated});
 

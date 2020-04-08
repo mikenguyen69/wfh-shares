@@ -13,6 +13,7 @@ module.exports = gql`
         createdAt: String
         weather: String
         feeling: String
+        mood: Float
         note: String
         image: String
         latitude: Float
@@ -32,6 +33,7 @@ module.exports = gql`
         feeling: String
         image: String
         note: String
+        mood: Float
         latitude: Float
         longitude: Float
     }
@@ -40,8 +42,9 @@ module.exports = gql`
         pinId: ID
         weather: String
         feeling: String
-        image: String
+        image: String 
         note: String
+        mood: Float
     }
 
     type Query {
