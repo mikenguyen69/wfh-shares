@@ -11,8 +11,6 @@ module.exports = gql`
     type Pin {
         _id: ID
         createdAt: String
-        weather: String
-        feeling: String
         mood: Float
         note: String
         image: String
@@ -29,8 +27,6 @@ module.exports = gql`
     }
 
     input CreatePinInput {
-        weather: String
-        feeling: String
         image: String
         note: String
         mood: Float
@@ -40,8 +36,6 @@ module.exports = gql`
 
     input EditPinInput {
         pinId: ID
-        weather: String
-        feeling: String
         image: String 
         note: String
         mood: Float
