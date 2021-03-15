@@ -12,10 +12,10 @@ import { ApolloProvider } from 'react-apollo';
 import { ApolloClient } from 'apollo-client';
 import { WebSocketLink } from 'apollo-link-ws';
 import { InMemoryCache } from 'apollo-cache-inmemory';
+import { getUri } from './serverConfig';
 
-const wsLink = new WebSocketLink({
-  uri: process.env.NODE_ENV === "production" ? 
-    'wss://wfh-shares.herokuapp.com/graphql' : "ws://localhost:4000/graphql",
+const wsLink = new WebSocketLink({ 
+  uri: getUri("wss"),
   options: {
     reconnect: true
   }

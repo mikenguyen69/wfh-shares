@@ -5,8 +5,7 @@ export const PIN_ADDED_SUBSCRIPTION = gql`
         pinAdded {
             _id
             createdAt
-            weather
-            feeling
+            mood
             image
             note,
             latitude
@@ -34,8 +33,7 @@ export const PIN_UPDATED_SUBSCRIPTION = gql`
         pinUpdated {
             _id
             createdAt
-            weather
-            feeling
+            mood
             image
             note,
             latitude
@@ -63,8 +61,7 @@ export const COMMENT_ADDED_SUBSCRIPTION = gql`
         commentAdded {
             _id
             createdAt
-            weather
-            feeling
+            mood
             image
             note,
             latitude

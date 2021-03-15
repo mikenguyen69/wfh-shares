@@ -40,6 +40,7 @@ export default function reducer(state, {type, payload}) {
                 draft: null
             }
         
+
         case "DELETE_PIN" : 
             const remainingPins = state.pins.filter(pin => pin._id !== payload._id);
 
@@ -47,10 +48,10 @@ export default function reducer(state, {type, payload}) {
 
             return {
                 ...state,
-                pin: remainingPins,
+                pins: remainingPins,
                 checkedin: false,
                 currentPin: null,
-                draft: {...state.currentLocation}
+                draft: null
             }
 
         case "GET_PINS": 
@@ -80,7 +81,8 @@ export default function reducer(state, {type, payload}) {
                 ...state,
                 pins: [...prevPins, newPin],
                 currentPin: payload,
-                checkedin: true
+                checkedin: true,
+                draft: null
             }
 
         case "SET_PIN": 
@@ -109,6 +111,13 @@ export default function reducer(state, {type, payload}) {
                 ...state,
                 draft: editPin,
             }
+
+        case "CLOSE_CURRENT_PIN": {
+            return {
+                ...state,
+                currentPin: null,
+            }
+        }
         
         default: 
             return state;        

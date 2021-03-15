@@ -6,35 +6,27 @@ import Typography from "@material-ui/core/Typography";
 import {ME_QUERY} from '../../graphql/queries';
 
 import Context from '../../context';
-import {BASE_URL} from '../../client';
+import { getUri } from '../../serverConfig';
 
 
 const Login =  ({ classes }) => {
 
-  const {dispatch} = useContext(Context)
-
+  const {dispatch} = useContext(Context);
+  
   const onSuccess = async googleUser => {
    
     try {
       const idToken = googleUser.getAuthResponse().id_token;
     
-      const client = new GraphQLClient(BASE_URL, {
+      const client = new GraphQLClient(getUri("https"), {
         headers: {authorization: idToken}
       })
       const {me} = await client.request(ME_QUERY);
-      
+  
       console.log("auto signin ?", me);
 
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(position => {
-          const {latitude, longitude} = position.coords;
-
-          dispatch({type: "SET_CURRENT_LOCATION", payload: {latitude, longitude}});
-          dispatch({type: "LOGIN_USER", payload: me});
-          dispatch({type: "IS_LOGGED_IN", payload: googleUser.isSignedIn()})
-        });
-      }
-
+      dispatch({type: "LOGIN_USER", payload: me});
+      dispatch({type: "IS_LOGGED_IN", payload: googleUser.isSignedIn()});
       
     } catch(err) {
       onFailure(err);

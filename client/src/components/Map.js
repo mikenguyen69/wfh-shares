@@ -4,6 +4,8 @@ import ReactMapGL, {NavigationControl, Marker, Popup} from 'react-map-gl';
 import {useClient} from '../client';
 import {GET_PINS_QUERY} from '../graphql/queries';
 
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+
 // import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 // import DeleteIcon from "@material-ui/icons/DeleteTwoTone";
@@ -11,52 +13,67 @@ import Typography from "@material-ui/core/Typography";
 import PinIcon from './PinIcon';
 import Context from '../context';
 import Blog from './Blog';
-//import { CREATE_PIN_MUTATION } from "../graphql/mutations";
+import CreatePin from './Pin/CreatePin';
+
 import {PIN_ADDED_SUBSCRIPTION, PIN_UPDATED_SUBSCRIPTION, 
   PIN_DELETED_SUBSCRIPTION,
   COMMENT_ADDED_SUBSCRIPTION} from '../graphql/subscriptions';
 import { Subscription } from "react-apollo";
 
+const DEFAULT_VIEW_PORT = {
+  latitude: -36.848754, 
+  longitude: 174.765129,
+  zoom: 11
+}
+
 const Map = ({ classes }) => {
   const client = useClient();
+  const mobileSize = useMediaQuery('(max-width: 650px)');
   const {state, dispatch} = useContext(Context);
-  const {currentLocation} = state;
-  const [viewport, setViewport] = useState({
-    latitude: currentLocation.latitude,
-    longitude: currentLocation.longitude,
-    zoom: 11
-  });
+
+  const [viewport, setViewport] = useState(DEFAULT_VIEW_PORT);
 
   const [popup, setPopup] = useState(null);
+  const [checkinPopup, setCheckinPopup] = useState(null);
 
   useEffect(() => {
-    getPins()
-  }, [])
+    console.log("reload the pins when lengths change");
+    getPins();
+  },[state.pins.length])
 
   useEffect(() => {
     const pinExists = popup && state.pins.findIndex(pin => pin._id === popup._id) > -1
-
     if (!pinExists) {
       setPopup(null);
     }
   }, [state.pins.length])
 
-  const getCurrentDate = () => {
-    var today = new Date();
-    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-'+today.getDate();
-    return date;
-  }
+  useEffect(() => {
+    if (!state.currentPin) {
+      setPopup(null);
+    }
+  }, [state.currentPin])
+  useEffect(() => {
+    if (state.checkedin) {
+      setCheckinPopup(null);
+    }
+  }, [state.checkedin])
 
   const getPins = async () => {
 
     const { getPins} = await client.request(GET_PINS_QUERY);
-
     dispatch({type: "GET_PINS", payload: getPins})
   }
 
-  const handleMapClick = ({lngLat, leftButton}) => {
-    
-    if (!leftButton) return; 
+  const handleMapClick = ({lngLat: [longitude, latitude], leftButton}) => {
+    if (leftButton && !state.checkedin) {
+      const selectedLocation = {latitude: latitude, longitude: longitude};
+      setCheckinPopup(selectedLocation);
+      
+      // close any openning popup
+      setPopup(null);
+      dispatch({type: "SET_CURRENT_LOCATION", payload: selectedLocation})
+    }
   }
 
   const handleViewPortChange = newViewport => {
@@ -72,20 +89,20 @@ const Map = ({ classes }) => {
   }
 
   return (
-  <div className={classes.root}>
+  <>
     <ReactMapGL
-      width="100vw"
-      height="calc(100vh - 64px)" 
+      width="100vw" 
+      height="calc(100vh - 64px)"
       mapStyle="mapbox://styles/mapbox/streets-v9" 
       mapboxApiAccessToken="pk.eyJ1IjoibWlrZW5ndXllbiIsImEiOiJjazV4OWsyb24yM29pM21vbm1iOWczcWVuIn0.-bnGQr4bUUFasXDdcRqpZw" 
       onClick={handleMapClick}
-      onViewStateChange={handleViewPortChange}
+      onViewportChange={handleViewPortChange}
       {...viewport}
-      
+      scrollZoom={!mobileSize}
     >
       {/* Naviation control*/}
       <div className={classes.navigationControl}>
-        <NavigationControl onViewStateChange={handleViewPortChange} />
+        <NavigationControl onViewportChange={handleViewPortChange} />
       </div>
 
       {/* Created Pins*/}
@@ -106,16 +123,29 @@ const Map = ({ classes }) => {
         </Marker>
       ))}
 
+      
+        
       {/* For current user location */}
-      {!state.checkedin && (        
-          <Marker
-            latitude={state.currentLocation.latitude}
-            longitude={state.currentLocation.longitude}
-            offsetLeft={-19}
-            offsetTop={-37}
+      {checkinPopup && (        
+          <>
+            <Marker
+              latitude={checkinPopup.latitude}
+              longitude={checkinPopup.longitude}
+              offsetLeft={-19}
+              offsetTop={-37}
+              >
+              <PinIcon color="darkorange" />
+            </Marker> 
+            <Popup anchor="top"
+              className={classes.checkinPopup}
+              latitude={checkinPopup.latitude}
+              longitude={checkinPopup.longitude}
+              closeOnClick={false}
+              onClose={() => setCheckinPopup(null)}
             >
-            <PinIcon color="darkorange" />
-          </Marker>          
+              <CreatePin />
+            </Popup>  
+          </>     
       )}
 
       {/* Show Popups*/}
@@ -126,28 +156,34 @@ const Map = ({ classes }) => {
           closeOnClick={false}
           onClose={() => setPopup(null)}
         >
-          <img 
-            className={classes.popupImage}
-            src={popup.image} 
-            alt={popup.type}
-          />
+          {
+            !popup.image ? null
+            : <div className={classes.imageContainer}>
+                <img 
+                  className={classes.popupImage}
+                  src={popup.image} 
+                  alt={popup.type}
+                />
+              </div> 
+          }
+          
           <div className={classes.popupTab}>
-            <Typography>
-              The weather is <b>{popup.weather}</b>
-            </Typography>     
-            <Typography>
-              You are feeling <b>{popup.feeling}</b>
-            </Typography>       
             <Typography className={classes.note}>
-              <q><i>{popup.note}</i></q> - {popup.author.name}
+              {popup.author.name}'s mood is <b>{popup.mood}</b> out of 5 today
             </Typography>
+            {
+              !popup.note 
+                ? null 
+                : <Typography className={classes.note}>
+                    <q><i>{popup.note}</i></q>
+                  </Typography>
+            }     
           </div>
         </Popup>
-      )
-
-      }
+      )}
     </ReactMapGL>
     {/* Subscriptions for creating / updating / deleting Pins */}
+    <>
     <Subscription
       subscription={PIN_ADDED_SUBSCRIPTION}
       onSubscriptionData={({subscriptionData}) => {
@@ -180,9 +216,13 @@ const Map = ({ classes }) => {
         dispatch({type: "CREATE_COMMENT", payload: commentAdded})
       }}
     />
-    {/* Blog area to add Pin content */}
-    <Blog />
-  </div>)
+    </>
+    {/* Blog area to add Pin content only for web */}
+      
+    <div className={mobileSize ? classes.blogAreaMobile: classes.blogArea}>
+      <Blog />
+    </div>
+  </>)
 };
 
 const styles = {
@@ -190,8 +230,6 @@ const styles = {
     display: "flex"
   },
   rootMobile: {
-    display: "flex",
-    flexDirection: "column-reverse"
   },
   navigationControl: {
     position: "absolute",
@@ -199,8 +237,32 @@ const styles = {
     left: 0,
     margin: "1em"
   },
+  geolocateControl: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    margin: "1em"
+  },
+  blogArea: {
+    position: "absolute",
+    top: '64px',
+    right:0,
+    margin: "0.5em"
+  },
+  blogAreaMobile: {
+    position: "absolute",
+    top: '56px',
+    right:0,
+    margin: "0.5em"
+  },
   deleteIcon: {
     color: "red"
+  },
+  checkinPopup: {
+    minWidth: 300,
+    maxWidth: 350,
+    minHeight: 350,
+    maxHeight: 400,
   },
   popupImage: {
     padding: "0.4em",
@@ -219,8 +281,13 @@ const styles = {
     flexDirection: "column"
   },
   picture: {
-    height: "30px",
+    height: 30,
+    width: 30,
     borderRadius: "90%",
+    objectFit: 'cover'
+  },
+  imageContainer: {
+    textAlign: 'center'
   }
 };
 

@@ -1,8 +1,7 @@
 export const CREATE_PIN_MUTATION = `
-    mutation($weather: String!, $feeling: String!, $image: String, $note: String!, $latitude: Float!, $longitude: Float!) {
+    mutation($mood: Float!, $image: String, $note: String, $latitude: Float!, $longitude: Float!) {
         createPin(input: {
-            weather: $weather,
-            feeling: $feeling,
+            mood: $mood,
             image: $image,
             note: $note,
             latitude: $latitude,
@@ -10,10 +9,9 @@ export const CREATE_PIN_MUTATION = `
         }) {
             _id
             createdAt
-            weather
-            feeling
+            mood
             image
-            note,
+            note
             latitude
             longitude
             author {
@@ -35,20 +33,18 @@ export const DELETE_PIN_MUTATION = `
 `
 
 export const EDIT_PIN_MUTATION = `
-    mutation($pinId: ID!, $weather: String!, $feeling: String!, $image: String, $note: String!) {
+    mutation($pinId: ID!, $mood: Float!, $image: String, $note: String) {
         editPin(input: {
             pinId: $pinId, 
-            weather: $weather,
-            feeling: $feeling,
+            mood: $mood,
             image: $image,
             note: $note
         }) {
             _id
             createdAt
-            weather
-            feeling
+            mood
+            note
             image
-            note,
             latitude
             longitude
             author {
@@ -66,10 +62,9 @@ export const CREATE_COMMENT_MUTATION = `
         createComment(pinId: $pinId, text: $text) {
             _id
             createdAt
-            weather
-            feeling
+            mood
             image
-            note,
+            note
             latitude
             longitude
             author {

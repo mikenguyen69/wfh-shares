@@ -13,8 +13,7 @@ export const GET_PINS_QUERY = `
 {
     getPins {
         _id
-        weather
-        feeling
+        mood
         image
         note
         latitude

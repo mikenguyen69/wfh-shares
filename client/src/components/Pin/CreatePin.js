@@ -1,9 +1,9 @@
 import React, {useState, useContext} from "react";
 import { withStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
-import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
+import Slider from "@material-ui/core/Slider";
 import AddAPhotoIcon from "@material-ui/icons/AddAPhotoTwoTone";
 import LandscapeIcon from "@material-ui/icons/LandscapeOutlined";
 import ClearIcon from "@material-ui/icons/Clear";
@@ -12,17 +12,17 @@ import Context from '../../context';
 import axios from 'axios';
 import {CREATE_PIN_MUTATION, EDIT_PIN_MUTATION} from '../../graphql/mutations';
 import {useClient} from '../../client';
-
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 const CreatePin = ({ classes }) => {
+  const mobileSize = useMediaQuery('(max-width:650px)');
   const client = useClient();
   const {state, dispatch} = useContext(Context);
-  const {draft, checkedin} = state;
+  const {draft, checkedin, currentLocation} = state;
 
-  const [feeling, setFeeling] = useState(checkedin ? draft.feeling: '');
-  const [weather, setWeather] = useState(checkedin ? draft.weather : '');
+  const [mood, setMood] = useState(3);
   const [image, setImage] = useState('');
-  const [note, setNote] = useState(checkedin ? draft.note: '');
+  const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async event => {
@@ -39,15 +39,15 @@ const CreatePin = ({ classes }) => {
         url = draft.image;
       }
 
-      const {latitude, longitude} = draft;
-      const variables = {weather, feeling, image:url,  note};
-
-      console.log('before submitting',image, variables, draft, state.currentPin)
+      const latitude = currentLocation.latitude;
+      const longitude = currentLocation.longitude;
+      const variables = {mood, image:url,  note};
 
       if (checkedin) {
         await client.request(EDIT_PIN_MUTATION, { pinId: state.currentPin._id, ...variables} );
       }
       else {
+        console.log("creating new pin now", variables);
         await client.request(CREATE_PIN_MUTATION, {...variables, latitude, longitude });
       }
      
@@ -79,113 +79,35 @@ const CreatePin = ({ classes }) => {
 
   return (
     <form className={classes.form}>
-      <Typography 
-        className={classes.alignCenter} 
-        component="h2"
-        variant="h4"
-        color="secondary"
-      >
-        <LandscapeIcon className={classes.iconLarge} /> 
-        Check-in Today!
-      </Typography>
+      {!mobileSize && (
+        <Typography 
+          className={classes.alignCenter} 
+          component="h2"
+          variant="h4"
+          color="secondary"
+        >
+          <LandscapeIcon className={classes.iconLarge} /> 
+          Check-in Today!
+        </Typography>
+      )}
+      
       <div>
-      <div className={classes.contentField}>
-        <TextField  
-          id="select-weather-type"
-          select
-          name="type"
-          label="What does weather like?" 
-          fullWidth
-          value={weather} 
-          onChange={(event) => setWeather(event.target.value)}         
-        >
-          {weathers.map(option => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
-       </div>
-       <div className={classes.contentField}>
-        <TextField  
-          id="select-status-type"
-          select
-          name="feeling"
-          label="How do you feel today?"
-          fullWidth
-          value={feeling} 
-          onChange={(event) => setFeeling(event.target.value)}         
-        >
-          {feelings.map(option => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
-        </div>
-        <div className={classes.contentField}>
-          {checkedin && (
-            <img 
-              className={classes.popupImage}
-              src={draft.image} 
-              alt={draft.note}
-            />
-          )}
+        {displayMoodSlider(classes, mood, setMood)}
 
-          <input 
-            accept="image/*" 
-            id="image" 
-            type="file"
-            className="classes.input"
-            onChange={e => setImage(e.target.files[0])}
-          />
-          <label htmlFor="image">
-            <Button style={{color: image && "green"}}
-              component="span"
-              size="small"
-              className={classes.Button}
-            >
-              <AddAPhotoIcon />
-            </Button>
-          </label>
-        </div>
-        <div className={classes.contentField}>
-          <TextField
-            name="note"
-            label="Note"
-            multiline
-            rows="3"
-            margin='normal'
-            fullWidth
-            variant="outlined" 
-            value={note}
-            onChange={e => setNote(e.target.value)}
-          />
-        </div>
-        <div className={classes.contentField}>
-          { checkedin && (
-            <Button 
-              className={classes.button} 
-              variant="contained" 
-              color="primary" 
-              onClick={handleDeleteDraft}
-            >
-              <ClearIcon className={classes.leftIcon} />
-              Discard
-            </Button>
-          )}
-          
-          <Button 
-            className={classes.button} 
-            variant="contained" 
-            color="secondary" 
-            disabled={!weather.trim() || !feeling.trim() || !note.trim() || submitting}
-            onClick={handleSubmit}
-          >
-            <SaveIcon className={classes.rightIcon}  />
-            Submit
-          </Button>
-        </div>
+        {displayNoteSection(mobileSize, classes, note, setNote)}
+
+        {displayImageSection(mobileSize, classes, checkedin, draft, image, setImage)}
+
+        {displayButtonsSection({ 
+          mobileSize,
+          classes, 
+          checkedin, 
+          handleDeleteDraft, 
+          mood, 
+          submitting, 
+          handleSubmit
+      })}
+
       </div>
     </form>
   );
@@ -235,50 +157,167 @@ const styles = theme => ({
     marginBottom: theme.spacing.unit * 2,
     marginRight: theme.spacing.unit,
     marginLeft: 0
+  },
+  customLabel: {
+    fontSize: 20
+  },
+  sliderStyles: {
+    width: '90%',
+    margin: '0 auto'
   }
 });
 
 export default withStyles(styles)(CreatePin);
 
-
-const weathers = [
+const moodMarks = [
   {
-    value: 'sunny',
-    label: 'Sunny',
+    value: 1,
+    label: '😭',
   },
   {
-    value: 'cloudy',
-    label: 'Cloudy',
+    value: 2,
+    label: '😟',
   },
   {
-    value: 'windy',
-    label: 'Windy',
+    value: 3,
+    label: '😐',
   },
   {
-    value: 'rainy',
-    label: 'Rainy',
+    value: 4,
+    label: '😊',
+  },
+  {
+    value: 5,
+    label: '😁'
   }
 ];
 
-const feelings = [
-  {
-    value: 'great',
-    label: 'Great'
-  },
-  {
-    value: 'lucky',
-    label: 'Lucky'
-  },
-  {
-    value: 'thankful',
-    label: 'Thankful'
-  },
-  {
-    value: 'peaceful',
-    label: 'Peaceful'
-  },
-  {
-    value: 'quiet',
-    label: 'Quiet'
-  },
-]
+const displayImageSection = (mobileSize, classes, checkedin, draft, image, setImage) => {
+  return (
+    <div className={classes.contentField}>
+    {/* {(checkedin && draft.image) && (
+      <img 
+        className={classes.popupImage}
+        src={draft.image} 
+        alt={draft.note}
+      />
+    )} */}
+
+    <Typography>
+      {!mobileSize && (
+      <span>
+         Add an image if you'd like
+      </span>
+      )}
+
+      <input 
+        accept="image/*" 
+        id="image" 
+        type="file"
+        className="classes.input"
+        onChange={e => setImage(e.target.files[0])}
+      />
+      <label htmlFor="image">
+        <Button style={{color: image && "green"}}
+          component="span"
+          size="small"
+          className={classes.Button}
+        >
+          <AddAPhotoIcon />
+        </Button>
+      </label>
+    </Typography>
+  </div>
+  )
+}
+
+const displayMoodSlider = (classes, mood, setMood) => {
+  return (
+    <div className={classes.contentField}>
+      <Typography id="discrete-slider-restrict" gutterBottom>
+        Tell us how you're feeling (1-5)*
+      </Typography>
+
+      <div className={classes.sliderStyles}>
+        <Slider
+          defaultValue={mood}
+          // getAriaValueText={valuetext}
+          aria-labelledby="discrete-slider-custom"
+          step={0.5}
+          label="How are you feeling?"
+          min={1}
+          max={5}
+        
+          valueLabelDisplay="auto"
+          marks={moodMarks}
+          classes={{markLabel: classes.customLabel}}
+          onChangeCommitted={(event, value) => setMood(value)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function displayNoteSection(mobileSize, classes, note, setNote) {
+  return (
+    <div className={classes.contentField}>
+    <TextField
+      name="note"
+      label="Tell us why"
+      multiline
+      rows={mobileSize ? "1" : "3"}
+      margin='normal'
+      fullWidth
+      variant="outlined" 
+      value={note}
+      onChange={e => setNote(e.target.value)}
+    />
+  </div>
+  )
+}
+
+function displayButtonsSection(displayButtonSectionProps) {
+  const { 
+    mobileSize,
+    classes, 
+    checkedin, 
+    handleDeleteDraft, 
+    mood, 
+    submitting, 
+    handleSubmit
+   } = displayButtonSectionProps;
+  
+  return (
+    <div className={classes.contentField}>
+    { checkedin && (
+      <Button 
+        className={classes.button} 
+        variant="contained" 
+        color="primary" 
+        onClick={handleDeleteDraft}
+      >
+        <ClearIcon className={classes.leftIcon} />
+        Discard
+      </Button>
+    )}
+    
+    <Button 
+      className={classes.button} 
+      variant="contained" 
+      color="secondary" 
+      disabled={!mood || submitting}
+      onClick={handleSubmit}
+    >
+      <SaveIcon className={classes.rightIcon}  />
+        {submitting ? 'Submitting...' : 'Submit'}
+    </Button>
+    
+    {!mobileSize && (
+      <div>
+      * = required
+      </div>
+    )}
+    
+  </div>
+  )
+}
